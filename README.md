@@ -1,1 +1,1 @@
-# DurakOnTon-
+# DurakOnTon - Full WebApp Game for Telegram with TON tokens
