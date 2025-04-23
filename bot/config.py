@@ -1,0 +1,1 @@
+# Bot configuration (token, etc)
