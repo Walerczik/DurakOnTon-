@@ -1,3 +1,5 @@
+// frontend/src/App.tsx
+
 import React, { useEffect, useState } from "react";
 import "./App.css";
 import logo from "./assets/logo.png";
@@ -47,7 +49,7 @@ export default function App() {
           setMsg("Вы взяли карты");
           break;
         default:
-          console.log("Unknown:", data);
+          console.log("Unknown message:", data);
       }
     };
     socket.onerror = console.error;
@@ -67,7 +69,12 @@ export default function App() {
 
   const defend = () => {
     if (!yourTurn || tableAttack.length === tableDefend.length) return;
-    ws?.send(JSON.stringify({ type: "defend", cardIndex: tableAttack[tableDefend.length] }));
+    ws?.send(
+      JSON.stringify({
+        type: "defend",
+        cardIndex: tableAttack[tableDefend.length] as any
+      })
+    );
   };
 
   const takeCards = () => {
@@ -76,38 +83,63 @@ export default function App() {
 
   return (
     <div className="app-container">
-      <img src={logo} alt="Logo" className="logo" />
+      <img src={logo} alt="DurakOnTon Logo" className="logo" />
       <h1>DurakOnTon</h1>
+
       {hand.length === 0 ? (
-        <button className="btn-big" onClick={joinGame}>Join Game</button>
+        <button className="btn-big" onClick={joinGame}>
+          Присоединиться
+        </button>
       ) : (
         <>
-          <div className="trump">Trump: {trump?.rank}{trump?.suit}</div>
+          <div className="trump">
+            Козырь: {trump?.rank}
+            {trump?.suit}
+          </div>
+
           <div className="table">
             <div className="attack">
               {tableAttack.map((c, i) => (
-                <div key={i} className="card">{c.rank}{c.suit}</div>
+                <div key={i} className="card">
+                  {c.rank}
+                  {c.suit}
+                </div>
               ))}
             </div>
             <div className="defend">
               {tableDefend.map((c, i) => (
-                <div key={i} className="card defend-card">{c.rank}{c.suit}</div>
+                <div key={i} className="card defend-card">
+                  {c.rank}
+                  {c.suit}
+                </div>
               ))}
             </div>
           </div>
+
           <div className="hand">
             {hand.map((c, i) => (
               <div key={i} className="card" onClick={() => playCard(i)}>
-                {c.rank}{c.suit}
+                {c.rank}
+                {c.suit}
               </div>
             ))}
           </div>
+
           <div className="actions">
-            <button className="btn-small" onClick={defend} disabled={!yourTurn}>Отбой</button>
-            <button className="btn-small" onClick={takeCards}>Беру</button>
+            <button
+              className="btn-small"
+              onClick={defend}
+              disabled={!yourTurn}
+            >
+              Отбой
+            </button>
+            <button className="btn-small" onClick={takeCards}>
+              Беру
+            </button>
           </div>
         </>
       )}
+
       <p className="msg">{msg}</p>
     </div>
   );
