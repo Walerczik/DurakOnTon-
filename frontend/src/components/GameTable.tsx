@@ -17,16 +17,9 @@ export default function GameTable() {
 
   useEffect(() => {
     const socket = new WebSocket("wss://durakonton.onrender.com");
-    socket.onopen = () => {
-      // сразу после открытия соединения шлём JOIN
-      socket.send(JSON.stringify({ type: "join" }));
-    };
-    socket.onmessage = (e) => {
+    socket.onopen = () => socket.send(JSON.stringify({ type: "join" }));
+    socket.onmessage = e => {
       const d = JSON.parse(e.data);
-      if (d.type === "waiting") {
-        // можно показать «Ждём второго…»
-        return;
-      }
       if (d.type === "update") {
         setHand(d.hand);
         setOpponentCount(d.opponentCount);
@@ -66,52 +59,39 @@ export default function GameTable() {
 
   return (
     <div className="game-table">
-      {/* Рука оппонента */}
+      {/* рука оппонента */}
       <div className="opponent-area">
         {Array.from({ length: opponentCount }).map((_, i) => (
-          <img
-            key={i}
-            src={cardBack}
-            alt="back"
-            className="card-back"
-          />
+          <img key={i} src={cardBack} className="card-back" alt="back" />
         ))}
       </div>
 
-      {/* Стопка + козырь */}
+      {/* колода + trump */}
       <div className="deck-trump">
         <div className="trump-behind">
           {trump && `${trump.rank}${trump.suit}`}
         </div>
-        <img
-          src={cardBack}
-          alt="deck"
-          className="card-back deck"
-        />
+        <img src={cardBack} className="card-back deck" alt="deck" />
         <div className="deck-size">×{deckCount}</div>
       </div>
 
-      {/* Игровой стол */}
+      {/* стол: пары attack/defend */}
       <div className="table-area">
-        <div className="attack-row">
-          {tableAttack.map((c, i) => (
-            <div key={i} className="card">
-              {c.rank}
-              {c.suit}
+        {tableAttack.map((atk, i) => (
+          <div key={i} className="card-pair">
+            <div className="card attack-card">
+              {atk.rank}{atk.suit}
             </div>
-          ))}
-        </div>
-        <div className="defend-row">
-          {tableDefend.map((c, i) => (
-            <div key={i} className="card defend">
-              {c.rank}
-              {c.suit}
-            </div>
-          ))}
-        </div>
+            {tableDefend[i] && (
+              <div className="card defend-card">
+                {tableDefend[i].rank}{tableDefend[i].suit}
+              </div>
+            )}
+          </div>
+        ))}
       </div>
 
-      {/* Ваша рука */}
+      {/* ваша рука */}
       <div className="hand-area">
         {hand.map((c, i) => (
           <div
@@ -121,13 +101,12 @@ export default function GameTable() {
               current === attacker ? attack(i) : defend(i)
             }
           >
-            {c.rank}
-            {c.suit}
+            {c.rank}{c.suit}
           </div>
         ))}
       </div>
 
-      {/* Кнопки */}
+      {/* кнопки */}
       <div className="controls">
         {current === attacker ? (
           <button onClick={pass} className="control-btn">
