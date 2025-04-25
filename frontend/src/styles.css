@@ -1,64 +1,148 @@
-/* Глобальные */
 body, html, #root {
-  margin: 0; padding: 0; height: 100%;
+  margin: 0;
+  padding: 0;
+  height: 100%;
 }
+
 .app-container {
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  height: 100vh; background: #2c3e50;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: #2c3e50;
   color: #fff;
 }
+
 /* Меню */
-.menu { text-align: center; }
-.logo { width: 160px; margin-bottom: 1rem; }
-.start-btn {
-  padding: 0.8rem 1.5rem; font-size: 1rem;
-  background: #007aff; border: none; border-radius: 6px;
-  cursor: pointer; color: #fff;
+.menu {
+  text-align: center;
 }
-/* Игровые зоны */
-.game-table { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 800px; }
-/* Оппонент сверху */
-.opponent-area { display: flex; gap: 0.4rem; margin-bottom: 1rem; }
-.card-back { width: 50px; height: 75px; background: #aaa; border-radius: 4px; }
+.logo {
+  width: 160px;
+  margin-bottom: 1rem;
+}
+.start-btn {
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  background: #007aff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #fff;
+}
+
+/* Игра */
+.game-table {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 800px;
+}
+
+/* Оппонент */
+.opponent-area {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+.card-back {
+  width: 50px;
+  height: 75px;
+  background: #aaa;
+  border-radius: 4px;
+}
+
 /* Колода + козырь */
 .deck-trump {
-  position: relative; display: flex; align-items: center;
-  gap: 0.5rem; margin-bottom: 1rem;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
 }
 .trump-behind {
-  position: absolute; top: 4px; left: 4px;
-  width: 50px; height: 75px;
-  background: #fff; border: 2px solid #f00; border-radius: 4px;
-  display: flex; align-items: center; justify-content: center;
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 50px;
+  height: 75px;
+  background: #fff;
   color: #000;
+  border: 2px solid #f00;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   z-index: 1;
 }
-.deck { position: relative; z-index: 2; }
-/* Размер колоды */
-.deck-size { font-size: 1rem; margin-left: 0.5rem; }
+.deck {
+  position: relative;
+  z-index: 2;
+}
+.deck-size {
+  font-size: 1rem;
+  margin-left: 0.5rem;
+}
+
 /* Стол */
-.table-area { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; margin-bottom: 1rem; }
-.attack-row, .defend-row { display: flex; gap: 0.5rem; }
-/* Ваша рука */
-.hand-area { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1rem; }
+.table-area {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+.attack-row, .defend-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Рука */
+.hand-area {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
 .card {
-  width: 50px; height: 75px;
-  background: #fff; color: #000;
-  border-radius: 4px; display: flex;
-  align-items: center; justify-content: center;
-  cursor: pointer; user-select: none;
+  width: 50px;
+  height: 75px;
+  background: #fff;
+  color: #000;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
 }
-.card.defend { background: #8f8; }
-/* Кнопки */
-.controls { margin-bottom: 1rem; }
+.card.defend {
+  background: #8f8;
+}
+
+/* Контролы */
+.controls {
+  margin-bottom: 1rem;
+}
 .control-btn {
-  padding: 0.6rem 1.2rem; font-size: 1rem;
-  background: #28a745; border: none; border-radius: 6px;
-  cursor: pointer; color: #fff;
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+  background: #28a745;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #fff;
 }
+
 /* Адаптив */
 @media (max-width: 600px) {
-  .card, .card-back { width: 40px; height: 60px; }
-  .logo { width: 120px; }
+  .card, .card-back {
+    width: 40px;
+    height: 60px;
+  }
+  .logo {
+    width: 120px;
+  }
 }
