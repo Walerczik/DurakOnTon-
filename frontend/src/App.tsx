@@ -3,10 +3,10 @@ import "./App.css";
 import logo from "./assets/logo.png";
 
 export default function App() {
-  const [msg, setMsg] = useState<string>("");
+  const [msg, setMsg] = useState<string>("wss://durakonton.onrender.com");
 
   useEffect(() => {
-    const ws = new WebSocket("wss://<your-backend>.onrender.com");
+    const ws = new WebSocket("");
     ws.onopen = () => ws.send(JSON.stringify({ type: "join" }));
     ws.onmessage = ({ data }) => setMsg(data.toString());
     ws.onerror = console.error;
