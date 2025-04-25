@@ -1,0 +1,26 @@
+.card {
+  width: 60px;
+  height: 90px;
+  background-color: white;
+  border: 1px solid #333;
+  border-radius: 8px;
+  margin: 4px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 6px;
+  box-shadow: 2px 2px 6px rgba(0,0,0,0.2);
+}
+
+.card.rotated {
+  transform: rotate(90deg);
+  transform-origin: center;
+}
+
+.card-back {
+  width: 60px;
+  height: 90px;
+  background: url('/card-back.png') center/cover no-repeat;
+  border-radius: 8px;
+  margin: 4px;
+}
