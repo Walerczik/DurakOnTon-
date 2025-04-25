@@ -1,127 +1,110 @@
-/* ========== Глобалка ========== */
+/* глобально */
 html, body, #root {
-  margin: 0; padding: 0;
-  width: 100%; height: 100%;
-  font-family: 'Segoe UI', sans-serif;
+  margin: 0; padding: 0; height: 100%;
 }
 .app-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
   height: 100vh;
   background: linear-gradient(145deg, #e9edf3, #f7f9fc);
+  font-family: 'Segoe UI', sans-serif;
   text-align: center;
 }
 
-/* ========== Меню ========== */
-.menu {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
+/* меню */
+.menu { display: flex; flex-direction: column; align-items: center; }
 .logo {
-  width: 40vw;
-  max-width: 220px;
+  width: 40vw; max-width: 220px;
   margin-bottom: 2rem;
 }
 .start-btn {
   padding: 1rem 2rem;
   font-size: 1.2rem;
-  background: #007aff;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
+  background: #007aff; color: #fff;
+  border: none; border-radius: 8px;
   cursor: pointer;
 }
 
-/* ========== Игра ========== */
-.game-table {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  max-width: 800px;
-}
+/* игровой стол */
+.game-table { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 800px; }
 
-/* Оппонент сверху */
+/* рука оппонента */
 .opponent-area {
-  display: flex;
-  gap: 1vw;
+  display: flex; gap: 1vw;
   margin-bottom: 1.5rem;
 }
 .card-back {
   width: 8vw; height: 12vw;
   max-width: 80px; max-height: 120px;
-  background: #aaa;
-  border-radius: 8px;
+  background: #aaa; border-radius: 8px;
 }
 
-/* Стопка + козырь */
+/* колода + козырь */
 .deck-trump {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 1vw;
-  margin-bottom: 1.5rem;
+  position: relative; display: flex; align-items: center;
+  gap: 1vw; margin-bottom: 1.5rem;
 }
 .trump-behind {
-  position: absolute;
-  top: 5px; left: 5px;
+  position: absolute; top: 5px; left: 5px;
   width: 8vw; height: 12vw;
   max-width: 80px; max-height: 120px;
-  background: #fff;
-  border: 2px solid #007aff;
+  background: #fff; border: 2px solid #007aff;
   border-radius: 8px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 2.5vw;
-  z-index: 1;
+  font-size: 2.5vw; z-index: 1;
 }
 .deck {
-  position: relative;
   z-index: 2;
 }
 .deck-size {
-  margin-left: 0.5rem;
-  font-size: 1.2rem;
-  font-weight: bold;
+  margin-left: 0.5rem; font-size: 1.2rem; font-weight: bold;
 }
 
-/* Стол */
+/* таблица ходов (стол) */
 .table-area {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 1vw;
+  display: flex; flex-wrap: wrap;
+  justify-content: center; gap: 1vw;
   margin-bottom: 1.5rem;
 }
-.attack-row, .defend-row {
-  display: flex;
-  gap: 1vw;
+.card-pair {
+  position: relative;
+  width: 8vw; height: 12vw;
+  max-width: 80px; max-height: 120px;
+  margin-right: 1vw;
+}
+.attack-card {
+  position: absolute; top: 0; left: 0;
+  z-index: 1;
+  background: #fff; display: flex;
+  align-items: center; justify-content: center;
+  width: 100%; height: 100%;
+  border-radius: 8px;
+}
+.defend-card {
+  position: absolute; top: 0; left: 0;
+  z-index: 2;
+  background: #c8e6c9; display: flex;
+  align-items: center; justify-content: center;
+  width: 100%; height: 100%;
+  border-radius: 8px;
 }
 
-/* Ваша рука */
+/* ваша рука */
 .hand-area {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 1vw;
-  margin-bottom: 1.5rem;
+  display: flex; flex-wrap: wrap;
+  gap: 1vw; margin-bottom: 1.5rem;
 }
 .card {
   width: 8vw; height: 12vw;
   max-width: 80px; max-height: 120px;
   background: #fff; color: #000;
-  border-radius: 8px; display: flex;
-  align-items: center; justify-content: center;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
   font-size: 2.5vw;
   cursor: pointer; user-select: none;
 }
-.card.defend {
-  background: #c8e6c9;
-}
 
-/* Кнопки */
+/* кнопки */
 .controls {
   display: flex; gap: 2vw;
   margin-bottom: 1.5rem;
@@ -129,29 +112,21 @@ html, body, #root {
 .control-btn {
   padding: 0.8rem 1.6rem;
   font-size: 1rem;
-  background: #28a745;
-  color: #fff;
+  background: #28a745; color: #fff;
   border: none; border-radius: 6px;
   cursor: pointer;
 }
 .control-btn:disabled {
-  background: #aaa;
-  cursor: not-allowed;
+  background: #aaa; cursor: not-allowed;
 }
 
-/* ========== Адаптив ========== */
+/* адаптив */
 @media (max-aspect-ratio: 1/1) {
   .card-back, .card, .trump-behind {
-    width: 12vw; height: 18vw;
-    font-size: 3.5vw;
+    width: 12vw; height: 18vw; font-size: 3.5vw;
   }
 }
 @media (max-width: 480px) {
-  .logo {
-    width: 60vw;
-  }
-  .start-btn {
-    font-size: 1rem;
-    padding: 0.8rem 1.5rem;
-  }
+  .logo { width: 60vw; }
+  .start-btn { padding: 0.8rem 1.5rem; font-size: 1rem; }
 }
