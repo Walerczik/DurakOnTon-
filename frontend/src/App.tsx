@@ -9,7 +9,7 @@ export default function App() {
   const [msg, setMsg] = useState<string>("");
 
   useEffect(() => {
-    const socket = new WebSocket("wss://ваш-бэкенд.onrender.com");
+    const socket = new WebSocket("wss://durakonton.onrender.com");
     socket.onopen = () => console.log("WS connected");
     socket.onmessage = e => {
       const data = JSON.parse(e.data);
