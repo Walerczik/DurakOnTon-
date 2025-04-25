@@ -2,12 +2,21 @@
   text-align: center;
   padding: 2rem;
 }
-.logo { width: 150px; margin-bottom: 1rem; }
-h1 { font-size: 2.5rem; color: #333; }
-p { font-size: 1.2rem; color: #666; }
-button {
-  margin-top:1rem; padding:0.8rem 1.5rem;
-  border:none; border-radius:5px;
-  background:#007aff; color:white; cursor:pointer;
+.logo {
+  width: 120px;
+  margin-bottom: 1rem;
 }
-button:hover { background:#005bb5; }
+.hand button {
+  margin: 0.2rem;
+  padding: 0.6rem;
+  border: none;
+  border-radius: 4px;
+  background: #007aff;
+  color: white;
+  cursor: pointer;
+}
+.msg {
+  margin-top: 1rem;
+  font-size: 1rem;
+  color: #333;
+}
