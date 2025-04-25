@@ -1,150 +1,104 @@
 /* Общие стили */
 body, html {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  height: 100%;
+  margin: 0; padding: 0;
+  width: 100%; height: 100%;
   overflow: hidden;
   font-family: 'Segoe UI', sans-serif;
   background: linear-gradient(145deg, #e9edf3, #f7f9fc);
 }
 
-/* Корневой контейнер на весь экран */
+/* Корневой контейнер */
 .app-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  width: 100vw;
-  height: 100vh;
-  padding: 1rem;
-  box-sizing: border-box;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: flex-start;
+  width: 100vw; height: 100vh;
+  padding: 1rem; box-sizing: border-box;
 }
 
-/* Логотип и заголовок */
 .logo {
-  width: 15vw;
-  max-width: 160px;
+  width: 15vw; max-width: 160px;
   margin-bottom: 1rem;
 }
 
 h1 {
   margin: 0.5rem 0 1rem;
-  font-size: 4vw;
-  max-font-size: 32px;
+  font-size: 4vw; max-font-size: 32px;
   color: #333;
 }
 
-/* Кнопка Join */
-.btn-big {
-  padding: 1rem 2rem;
-  font-size: 1.5rem;
-  background: #007aff;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-/* Зона козыря */
-.trump {
-  margin-bottom: 0.5rem;
-  font-size: 1.2rem;
-  font-weight: bold;
-}
-
-/* Игровой стол: атака и защита */
-.table {
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-  width: 100%;
-  flex-wrap: wrap;
+/* Рубашки карт оппонента */
+.opponent-hand {
+  display: flex; gap: 0.5vw;
   margin-bottom: 1rem;
 }
+.card-back {
+  width: 8vw; height: 12vw;
+  max-width: 80px; max-height: 120px;
+  background: #ccc; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.5vw; user-select: none;
+}
 
-/* Зоны атакующих и защищающих карт */
-.attack, .defend {
-  display: flex;
-  gap: 0.5vw;
+/* Колода и козырь */
+.deck-area {
+  display: flex; align-items: center;
+  gap: 0.5vw; margin-bottom: 1rem;
+}
+.deck-card { width: 8vw; height: 12vw; }
+.deck-count {
+  font-size: 1.2rem; font-weight: bold;
+}
+.trump-card {
+  width: 8vw; height: 12vw;
+  border: 2px solid #007aff; 
+}
+
+/* Стол */
+.table { display: flex; justify-content: center; align-items: flex-end; width:100%; flex-wrap:wrap; margin-bottom:1rem; }
+.attack, .defend { display: flex; gap: 0.5vw; }
+
+/* Рука игрока */
+.hand {
+  display: flex; flex-wrap: wrap;
+  justify-content: center; gap: 0.5vw;
+  margin-bottom: 1rem;
 }
 
 /* Карточка */
 .card {
-  width: 10vw;
-  height: 15vw;
-  max-width: 100px;
-  max-height: 150px;
-  background: #fff;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  box-shadow: 1px 1px 6px rgba(0,0,0,0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 2.5vw;
-  cursor: pointer;
-  user-select: none;
+  width: 10vw; height: 15vw;
+  max-width: 100px; max-height: 150px;
+  background: #fff; border: 1px solid #ccc;
+  border-radius: 8px; box-shadow: 1px 1px 6px rgba(0,0,0,0.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.5vw; user-select: none; cursor: pointer;
   transition: transform 0.2s;
 }
+.card:hover { transform: translateY(-5%); }
+.defend-card { opacity: 0.8; }
 
-.card:hover {
-  transform: translateY(-5%);
+/* Кнопки */
+.btn-big {
+  padding: 1rem 2rem; font-size:1.5rem;
+  background:#007aff; color:#fff;
+  border:none; border-radius:8px; cursor:pointer;
 }
-
-/* Защитная карта */
-.defend-card {
-  opacity: 0.8;
-}
-
-/* Рука игрока */
-.hand {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.5vw;
-  margin-bottom: 1rem;
-}
-
-/* Кнопки действий */
-.actions {
-  display: flex;
-  gap: 1vw;
-  margin-bottom: 1rem;
-}
-
+.actions { display:flex; gap:1vw; margin-bottom:1rem; }
 .btn-small {
-  padding: 0.8rem 1.5rem;
-  font-size: 1rem;
-  background: #28a745;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 0.2s;
+  padding:0.8rem 1.5rem; font-size:1rem;
+  background:#28a745; color:#fff;
+  border:none; border-radius:6px; cursor:pointer;
+  transition:background 0.2s;
 }
+.btn-small:hover:not(:disabled) { background:#218838; }
+.btn-small:disabled { background:#aaa; cursor:not-allowed; }
 
-.btn-small:hover:not(:disabled) {
-  background: #218838;
-}
-
-.btn-small:disabled {
-  background: #aaa;
-  cursor: not-allowed;
-}
-
-/* Сообщение под столом */
 .msg {
-  font-size: 1rem;
-  color: #333;
-  margin-top: auto;
+  margin-top:auto; font-size:1rem; color:#333;
 }
 
-/* Адаптация под очень узкие экраны */
-@media (max-aspect-ratio: 1/1) {
-  .card {
-    width: 14vw;
-    height: 21vw;
-    font-size: 3.5vw;
-  }
+/* Узкие экраны */
+@media (max-aspect-ratio:1/1) {
+  .card { width:14vw; height:21vw; font-size:3.5vw; }
+  .card-back { width:12vw; height:18vw; font-size:3.5vw; }
 }
