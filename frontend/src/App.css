@@ -28,19 +28,29 @@ body, html {
   border: none; border-radius: 6px; cursor: pointer;
 }
 
-/* Инфо-строка: колода и козырь */
-.info-row {
-  display: flex; align-items: center;
-  gap: 0.5vw; margin-bottom: 1rem;
+/* Область: стопка + козырь */
+.deck-trump-area {
+  display: flex; align-items: center; gap: 1vw;
+  margin-bottom: 1rem;
 }
 
-.deck-card { width: 6vw; height: 9vw; }
-.deck-count { font-weight: bold; }
+.deck-stack {
+  display: flex; flex-direction: column; align-items: center;
+}
+
+.deck-card {
+  width: 6vw; height: 9vw;
+}
+
+.deck-count {
+  margin-top: 0.2rem; font-size: 1.2rem;
+}
 
 .trump-card {
   width: 6vw; height: 9vw;
   border: 2px solid #007aff; border-radius: 6px;
   display: flex; align-items: center; justify-content: center;
+  font-size: 2.5vw;
 }
 
 /* Рука оппонента */
@@ -62,6 +72,7 @@ body, html {
   justify-content: center; gap: 0.5vw;
   margin-bottom: 1rem;
 }
+
 .attack, .defend { display: flex; gap: 0.5vw; }
 
 /* Ваша рука */
