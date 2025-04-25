@@ -1,5 +1,3 @@
-// frontend/src/App.tsx
-
 import React, { useEffect, useState } from "react";
 import "./App.css";
 import logo from "./assets/logo.png";
@@ -8,125 +6,103 @@ type Card = { suit: string; rank: string };
 
 export default function App() {
   const [ws, setWs] = useState<WebSocket | null>(null);
-  const [connected, setConnected] = useState(false);
   const [joined, setJoined] = useState(false);
+
   const [hand, setHand] = useState<Card[]>([]);
+  const [opponentCount, setOpponentCount] = useState(0);
+  const [deckCount, setDeckCount] = useState(0);
+  const [trump, setTrump] = useState<Card | null>(null);
   const [tableAttack, setTableAttack] = useState<Card[]>([]);
   const [tableDefend, setTableDefend] = useState<Card[]>([]);
-  const [trump, setTrump] = useState<Card | null>(null);
-  const [deckCount, setDeckCount] = useState(0);
   const [yourTurn, setYourTurn] = useState(false);
-  const [msg, setMsg] = useState<string>("Подключаемся...");
+  const [role, setRole] = useState<"attacker" | "defender">("attacker");
+  const [msg, setMsg] = useState("Не подключено");
 
   useEffect(() => {
     const socket = new WebSocket("wss://durakonton.onrender.com");
-
-    socket.onopen = () => {
-      setConnected(true);
-      setMsg("Готов к игре");
-    };
-
-    socket.onmessage = (e) => {
+    socket.onopen = () => setMsg("Готов к игре");
+    socket.onmessage = e => {
       const data = JSON.parse(e.data);
-      switch (data.type) {
-        case "waiting":
-          setMsg(data.message);
-          break;
-        case "gameStart":
-          setHand(data.hand);
-          setTrump(data.trump);
-          setDeckCount(data.deckCount);
-          setYourTurn(data.yourTurn);
-          setMsg(data.yourTurn ? "Ваш ход" : "Ход соперника");
-          break;
-        case "cardPlayed":
-          setTableAttack((t) => [...t, data.card]);
-          setYourTurn(!yourTurn);
-          setMsg(yourTurn ? "Вы атаковали" : "Соперник атаковал");
-          break;
-        case "defended":
-          setTableDefend((t) => [...t, data.card]);
-          setYourTurn(true);
-          setMsg("Вы отбили");
-          break;
-        case "taken":
-          setHand((h) => [...h, ...tableAttack, ...tableDefend]);
-          setTableAttack([]);
-          setTableDefend([]);
-          setYourTurn(false);
-          setMsg("Вы взяли карты");
-          break;
-        default:
-          console.log("Unknown:", data);
+      if (data.type === "waiting") {
+        setMsg(data.message);
+      }
+      if (data.type === "update") {
+        setHand(data.hand);
+        setOpponentCount(data.opponentCount);
+        setDeckCount(data.deckCount);
+        setTrump(data.trump);
+        setTableAttack(data.tableAttack);
+        setTableDefend(data.tableDefend);
+        setYourTurn(data.yourTurn);
+        setRole(data.role);
+        if (!joined && data.hand.length) setJoined(true);
+        setMsg(data.yourTurn ? (data.role === "attacker" ? "Ваш ход (атакуйте)" : "Ваш ход (отбивайтесь)") : "Ожидание хода соперника");
       }
     };
-
     socket.onerror = () => setMsg("Ошибка соединения");
     setWs(socket);
-
-    return () => {
-      socket.close();
-    };
-  }, []);
+    return () => socket.close();
+  }, [joined]);
 
   const joinGame = () => {
-    if (ws && connected && !joined) {
+    if (ws) {
       ws.send(JSON.stringify({ type: "join" }));
-      setJoined(true);
       setMsg("Запрошено подключение...");
     }
   };
 
   const playCard = (i: number) => {
-    if (!yourTurn) return;
-    ws?.send(JSON.stringify({ type: "attack", cardIndex: i }));
-    setHand((h) => h.filter((_, idx) => idx !== i));
+    if (role === "attacker" && yourTurn) {
+      ws?.send(JSON.stringify({ type: "attack", cardIndex: i }));
+    }
   };
 
-  const defend = () => {
-    if (!yourTurn || tableAttack.length === tableDefend.length) return;
-    ws?.send(
-      JSON.stringify({
-        type: "defend",
-        cardIndex: tableAttack[tableDefend.length],
-      })
-    );
+  const defend = (i: number) => {
+    if (role === "defender" && yourTurn) {
+      ws?.send(JSON.stringify({ type: "defend", cardIndex: i }));
+    }
   };
 
-  const takeCards = () => {
-    ws?.send(JSON.stringify({ type: "take" }));
+  const pass = () => {
+    if (role === "attacker" && yourTurn) {
+      ws?.send(JSON.stringify({ type: "pass" }));
+    }
+  };
+
+  const take = () => {
+    if (role === "defender" && yourTurn) {
+      ws?.send(JSON.stringify({ type: "take" }));
+    }
   };
 
   return (
     <div className="app-container">
-      <img src={logo} className="logo" alt="DurakOnTon Logo" />
+      <img src={logo} alt="Logo" className="logo" />
       <h1 className="title">DurakOnTon</h1>
 
       {!joined ? (
-        <button
-          className="btn-big"
-          onClick={joinGame}
-          disabled={!connected}
-        >
-          {connected ? "Присоединиться" : "Подключение..."}
+        <button className="btn-big" onClick={joinGame}>
+          Присоединиться
         </button>
       ) : (
         <>
-          <div className="opponent-hand">
-            {Array(deckCount)
-              .fill(0)
-              .map((_, i) => (
-                <div key={i} className="card-back">🂠</div>
-              ))}
-          </div>
-
-          <div className="deck-area">
+          <div className="info-row">
+            <div>Колода:</div>
             <div className="card-back deck-card">🂠</div>
-            <span className="deck-count">{deckCount}</span>
+            <div>× {deckCount}</div>
+            <div>Козырь:</div>
             <div className="card trump-card">
               {trump?.rank}
               {trump?.suit}
             </div>
+          </div>
+
+          <div className="opponent-hand">
+            {Array(opponentCount)
+              .fill(0)
+              .map((_, i) => (
+                <div key={i} className="card-back">🂠</div>
+              ))}
           </div>
 
           <div className="table">
@@ -153,7 +129,13 @@ export default function App() {
               <div
                 key={i}
                 className="card"
-                onClick={() => playCard(i)}
+                onClick={() =>
+                  role === "attacker"
+                    ? playCard(i)
+                    : role === "defender"
+                    ? defend(i)
+                    : null
+                }
               >
                 {c.rank}
                 {c.suit}
@@ -162,16 +144,16 @@ export default function App() {
           </div>
 
           <div className="actions">
-            <button
-              className="btn-small"
-              onClick={defend}
-              disabled={!yourTurn}
-            >
-              Отбой
-            </button>
-            <button className="btn-small" onClick={takeCards}>
-              Беру
-            </button>
+            {role === "attacker" && (
+              <button className="btn-small" onClick={pass} disabled={!yourTurn}>
+                Отбой
+              </button>
+            )}
+            {role === "defender" && (
+              <button className="btn-small" onClick={take} disabled={!yourTurn}>
+                Беру
+              </button>
+            )}
           </div>
         </>
       )}
