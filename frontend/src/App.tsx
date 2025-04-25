@@ -1,87 +1,33 @@
-import React, { useState, useEffect } from 'react';
-import './App.css';
-import Menu from './components/Menu';
-import GameTable from './components/GameTable';
+import React, { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
+import GameTable from './components/GameTable';
+import Lobby from './components/Lobby';
 
-const socket = io(import.meta.env.VITE_BACKEND_URL || 'https://durakonton.onrender.com');
+const socket = io(process.env.REACT_APP_BACKEND_URL || 'https://durakonton.onrender.com');
 
 function App() {
   const [player, setPlayer] = useState(null);
-  const [opponent, setOpponent] = useState(null);
-  const [tableCards, setTableCards] = useState([]);
-  const [deck, setDeck] = useState([]);
-  const [trumpCard, setTrumpCard] = useState(null);
-  const [isMyTurn, setIsMyTurn] = useState(false);
-  const [isDefending, setIsDefending] = useState(false);
-  const [mode, setMode] = useState(null);
-  const [joined, setJoined] = useState(false);
-
-  const handleJoin = () => {
-    if (mode) {
-      socket.emit('join', { mode });
-      setJoined(true);
-    }
-  };
-
-  const handleCardClick = (card) => {
-    socket.emit('play-card', card);
-  };
-
-  const handlePass = () => {
-    socket.emit('pass');
-  };
-
-  const handleTake = () => {
-    socket.emit('take');
-  };
 
   useEffect(() => {
-    socket.on('init', (data) => {
-      setPlayer(data.player);
-      setOpponent(data.opponent);
-      setDeck(data.deck);
-      setTrumpCard(data.trumpCard);
+    socket.on('connect', () => {
+      console.log('Connected to server');
     });
 
-    socket.on('update', (data) => {
-      setPlayer(data.player);
-      setOpponent(data.opponent);
-      setTableCards(data.tableCards);
-      setDeck(data.deck);
-      setTrumpCard(data.trumpCard);
-      setIsMyTurn(data.isMyTurn);
-      setIsDefending(data.isDefending);
+    socket.on('playerAssigned', (playerData) => {
+      setPlayer(playerData);
     });
 
     return () => {
-      socket.off('init');
-      socket.off('update');
+      socket.disconnect();
     };
   }, []);
 
   return (
     <div className="App">
-      {!player || !joined ? (
-        <Menu
-          onSelectMode={(selectedMode) => {
-            setMode(selectedMode);
-            handleJoin();
-          }}
-        />
+      {player ? (
+        <GameTable socket={socket} player={player} />
       ) : (
-        <GameTable
-          player={player}
-          opponent={opponent}
-          tableCards={tableCards}
-          deck={deck}
-          trumpCard={trumpCard}
-          onCardClick={handleCardClick}
-          onTake={handleTake}
-          onPass={handlePass}
-          isMyTurn={isMyTurn}
-          isDefending={isDefending}
-        />
+        <Lobby socket={socket} />
       )}
     </div>
   );
