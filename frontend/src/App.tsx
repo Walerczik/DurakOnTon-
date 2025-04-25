@@ -15,10 +15,12 @@ function App() {
   const [isMyTurn, setIsMyTurn] = useState(false);
   const [isDefending, setIsDefending] = useState(false);
   const [mode, setMode] = useState(null);
+  const [joined, setJoined] = useState(false);
 
   const handleJoin = () => {
     if (mode) {
       socket.emit('join', { mode });
+      setJoined(true);
     }
   };
 
@@ -60,7 +62,7 @@ function App() {
 
   return (
     <div className="App">
-      {!player ? (
+      {!player || !joined ? (
         <Menu
           onSelectMode={(selectedMode) => {
             setMode(selectedMode);
