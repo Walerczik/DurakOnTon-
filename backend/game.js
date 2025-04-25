@@ -1,7 +1,7 @@
 // backend/game.js
 const waiting = [];
 
-// Создаем и тасуем колоду
+// Колода 36 карт
 function createDeck() {
   const suits = ["♠","♥","♦","♣"];
   const ranks = ["6","7","8","9","10","J","Q","K","A"];
@@ -9,6 +9,7 @@ function createDeck() {
   suits.forEach(s => ranks.forEach(r => deck.push({ suit: s, rank: r })));
   return deck;
 }
+
 function shuffle(deck) {
   for (let i = deck.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -16,10 +17,10 @@ function shuffle(deck) {
   }
 }
 
-// Проверяет, может ли defend побить attack
+// Может ли def побить atk по правилам
 function canBeat(def, atk, trumpSuit) {
   if (def.suit === atk.suit) {
-    const order = [..."6789JQKA"];
+    const order = ["6","7","8","9","10","J","Q","K","A"];
     return order.indexOf(def.rank) > order.indexOf(atk.rank);
   }
   return def.suit === trumpSuit && atk.suit !== trumpSuit;
@@ -29,44 +30,53 @@ export function handleSocket(ws) {
   ws.on("message", raw => {
     const msg = JSON.parse(raw);
 
-    // JOIN
+    // --- JOIN ---
     if (msg.type === "join") {
       waiting.push(ws);
       if (waiting.length === 2) {
         const [p1, p2] = waiting.splice(0, 2);
         startGame(p1, p2);
       } else {
-        ws.send(JSON.stringify({ type: "waiting", message: "Ждём второго..." }));
+        ws.send(JSON.stringify({ type: "waiting", message: "Ждём второго игрока…" }));
       }
       return;
     }
 
-    // Игровые действия
+    // Остальное только после старта
     const game = ws.game;
     if (!game) return;
     const idx = ws.playerIdx;
     const opp = 1 - idx;
 
-    // Атаковать
+    // --- ATTACK ---
     if (msg.type === "attack" && game.current === idx) {
-      const card = game.hands[idx].splice(msg.cardIndex, 1)[0];
+      const card = game.hands[idx][msg.cardIndex];
+      // Проверка: либо первый ход, либо ранг уже на столе
+      const anyOnTable = [...game.table.attack, ...game.table.defend];
+      const rankList = anyOnTable.map(c => c.rank);
+      if (game.table.attack.length > 0 && !rankList.includes(card.rank)) {
+        return; // недопустимый ход
+      }
+      game.hands[idx].splice(msg.cardIndex, 1);
       game.table.attack.push(card);
       game.current = opp;
       broadcast(game);
       return;
     }
-    // Отбиться
+
+    // --- DEFEND ---
     if (msg.type === "defend" && game.current === idx) {
       const atkCard = game.table.attack[game.table.defend.length];
       const defCard = game.hands[idx][msg.cardIndex];
       if (!canBeat(defCard, atkCard, game.trump.suit)) return;
-      const card = game.hands[idx].splice(msg.cardIndex, 1)[0];
-      game.table.defend.push(card);
+      game.hands[idx].splice(msg.cardIndex, 1);
+      game.table.defend.push(defCard);
       game.current = opp;
       broadcast(game);
       return;
     }
-    // Отбой (pass)
+
+    // --- PASS (отбой) ---
     if (msg.type === "pass" && idx === game.attacker && game.current === idx) {
       game.table.attack = [];
       game.table.defend = [];
@@ -75,7 +85,8 @@ export function handleSocket(ws) {
       broadcast(game);
       return;
     }
-    // Брать
+
+    // --- TAKE (беру) ---
     if (msg.type === "take" && idx !== game.attacker && game.current === idx) {
       game.hands[idx].push(...game.table.attack, ...game.table.defend);
       game.table.attack = [];
@@ -87,9 +98,8 @@ export function handleSocket(ws) {
   });
 
   ws.on("close", () => {
-    // Если игрок ушёл до старта
     const i = waiting.indexOf(ws);
-    if (i >= 0) waiting.splice(i, 1);
+    if (i !== -1) waiting.splice(i, 1);
   });
 }
 
@@ -97,21 +107,23 @@ function startGame(p1, p2) {
   const deck = createDeck();
   shuffle(deck);
   const trump = deck.pop();
-  const hands = [[], []];
+  const hands = [[],[]];
   for (let i = 0; i < 6; i++) {
     hands[0].push(deck.pop());
     hands[1].push(deck.pop());
   }
   const game = {
-    deck, trump, hands,
+    deck,
+    trump,
+    hands,
     table: { attack: [], defend: [] },
     attacker: 0,
     current: 0,
     players: [p1, p2]
   };
-  [p1, p2].forEach((ws, idx) => {
-    ws.game = game;
-    ws.playerIdx = idx;
+  [p1, p2].forEach((client, idx) => {
+    client.game = game;
+    client.playerIdx = idx;
   });
   broadcast(game);
 }
