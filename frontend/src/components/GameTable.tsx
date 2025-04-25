@@ -1,63 +1,87 @@
-import React from 'react';
-import './GameTable.css';
+import React, { useEffect, useState } from "react";
+import { Socket } from "socket.io-client";
+import "./GameTable.css";
+import cardBack from "../assets/card-back.png";
 
-type Card = {
-  suit: string;
-  value: string;
-};
+export type Card = { suit: string; value: string };
 
-type Player = {
-  id: string;
-  hand: Card[];
-};
+interface TablePair { attack: Card; defense?: Card }
 
-type Props = {
-  player: Player;
-  opponent: Player | null;
-  tableCards: { attack: Card; defense?: Card }[];
-  deck: Card[];
-  trumpCard: Card | null;
-  onCardClick: (card: Card) => void;
-  onTake: () => void;
-  onPass: () => void;
-  isMyTurn: boolean;
-  isDefending: boolean;
-};
+interface Props {
+  socket: Socket;
+  player: { id: string; hand: Card[] };
+}
 
-const GameTable: React.FC<Props> = ({
-  player,
-  opponent,
-  tableCards,
-  deck,
-  trumpCard,
-  onCardClick,
-  onTake,
-  onPass,
-  isMyTurn,
-  isDefending,
-}) => {
+const GameTable: React.FC<Props> = ({ socket, player }) => {
+  const [opponentHandCount, setOpponentHandCount] = useState(0);
+  const [tableCards, setTableCards] = useState<TablePair[]>([]);
+  const [deck, setDeck] = useState<Card[]>([]);
+  const [trumpCard, setTrumpCard] = useState<Card | null>(null);
+  const [isMyTurn, setIsMyTurn] = useState(false);
+  const [isDefending, setIsDefending] = useState(false);
+  const [hand, setHand] = useState<Card[]>(player.hand);
+
+  useEffect(() => {
+    // При подключении сервер шлёт initial state вместе с player.hand в App
+    // Дальше он шлёт «update» on game events
+    socket.on("update", (data: {
+      playerHand: Card[];
+      opponentHandCount: number;
+      tableCards: TablePair[];
+      deck: Card[];
+      trumpCard: Card;
+      isMyTurn: boolean;
+      isDefending: boolean;
+    }) => {
+      setHand(data.playerHand);
+      setOpponentHandCount(data.opponentHandCount);
+      setTableCards(data.tableCards);
+      setDeck(data.deck);
+      setTrumpCard(data.trumpCard);
+      setIsMyTurn(data.isMyTurn);
+      setIsDefending(data.isDefending);
+    });
+
+    return () => {
+      socket.off("update");
+    };
+  }, [socket]);
+
+  const onPlay = (idx: number) => {
+    if (!isMyTurn) return;
+    socket.emit(isDefending ? "defend" : "attack", { cardIndex: idx });
+  };
+
+  const onPass = () => {
+    if (isMyTurn && !isDefending) socket.emit("pass");
+  };
+
+  const onTake = () => {
+    if (isMyTurn && isDefending) socket.emit("take");
+  };
+
   return (
     <div className="game-table">
-      {opponent && (
-        <div className="opponent-hand">
-          {opponent.hand.map((_, i) => (
-            <img key={i} src="/card-back.png" alt="Opponent card" className="card" />
-          ))}
-        </div>
-      )}
+      {/* Оппонент сверху */}
+      <div className="opponent-hand">
+        {Array(opponentHandCount).fill(0).map((_, i) => (
+          <img key={i} src={cardBack} className="card" alt="back" />
+        ))}
+      </div>
 
+      {/* Игровой стол */}
       <div className="table-cards">
-        {tableCards.map(({ attack, defense }, i) => (
-          <div className="card-pair" key={i}>
+        {tableCards.map((pair, i) => (
+          <div key={i} className="card-pair">
             <img
-              src={`/cards/${attack.value}_of_${attack.suit}.png`}
-              alt="Attack card"
+              src={`/cards/${pair.attack.value}_of_${pair.attack.suit}.png`}
+              alt="attack"
               className="card"
             />
-            {defense && (
+            {pair.defense && (
               <img
-                src={`/cards/${defense.value}_of_${defense.suit}.png`}
-                alt="Defense card"
+                src={`/cards/${pair.defense.value}_of_${pair.defense.suit}.png`}
+                alt="defense"
                 className="card defense"
               />
             )}
@@ -65,36 +89,45 @@ const GameTable: React.FC<Props> = ({
         ))}
       </div>
 
+      {/* Ваша рука */}
       <div className="player-hand">
-        {player.hand.map((card, i) => (
+        {hand.map((c, i) => (
           <img
             key={i}
-            src={`/cards/${card.value}_of_${card.suit}.png`}
-            alt={`${card.value} of ${card.suit}`}
+            src={`/cards/${c.value}_of_${c.suit}.png`}
+            alt={`${c.value} of ${c.suit}`}
             className="card"
-            onClick={() => onCardClick(card)}
+            onClick={() => onPlay(i)}
           />
         ))}
       </div>
 
+      {/* Кнопки */}
       <div className="action-buttons">
-        {isMyTurn && (
-          <button onClick={isDefending ? onTake : onPass}>
-            {isDefending ? 'Беру' : 'Отбой'}
+        {!isDefending ? (
+          <button onClick={onPass} disabled={!isMyTurn}>
+            Отбой
+          </button>
+        ) : (
+          <button onClick={onTake} disabled={!isMyTurn}>
+            Беру
           </button>
         )}
       </div>
 
+      {/* Колода + козырь */}
       <div className="deck-area">
-        {deck.length > 1 && <img src="/card-back.png" alt="Deck" className="card" />}
+        {deck.length > 1 && (
+          <img src={cardBack} className="card" alt="deck" />
+        )}
         {trumpCard && (
           <img
             src={`/cards/${trumpCard.value}_of_${trumpCard.suit}.png`}
-            alt="Trump"
             className="card trump-card"
+            alt="trump"
           />
         )}
-        <div style={{ color: '#fff', marginTop: '10px' }}>В колоде: {deck.length}</div>
+        <div className="deck-count">×{deck.length}</div>
       </div>
     </div>
   );
