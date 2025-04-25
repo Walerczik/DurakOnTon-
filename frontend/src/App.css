@@ -1,4 +1,3 @@
-/* Обёртка на весь экран */
 body, html {
   margin: 0; padding: 0;
   width: 100%; height: 100%;
@@ -29,7 +28,7 @@ body, html {
   border: none; border-radius: 6px; cursor: pointer;
 }
 
-/* Инфо о колоде и козыре */
+/* Инфо-строка: колода и козырь */
 .info-row {
   display: flex; align-items: center;
   gap: 0.5vw; margin-bottom: 1rem;
