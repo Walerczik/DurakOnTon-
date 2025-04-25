@@ -16,27 +16,32 @@ export default function App() {
   const [tableDefend, setTableDefend] = useState<Card[]>([]);
   const [yourTurn, setYourTurn] = useState(false);
   const [role, setRole] = useState<"attacker" | "defender">("attacker");
-  const [msg, setMsg] = useState("Не подключено");
+  const [msg, setMsg] = useState("Подключение...");
 
   useEffect(() => {
     const socket = new WebSocket("wss://durakonton.onrender.com");
     socket.onopen = () => setMsg("Готов к игре");
     socket.onmessage = e => {
-      const data = JSON.parse(e.data);
-      if (data.type === "waiting") {
-        setMsg(data.message);
-      }
-      if (data.type === "update") {
-        setHand(data.hand);
-        setOpponentCount(data.opponentCount);
-        setDeckCount(data.deckCount);
-        setTrump(data.trump);
-        setTableAttack(data.tableAttack);
-        setTableDefend(data.tableDefend);
-        setYourTurn(data.yourTurn);
-        setRole(data.role);
-        if (!joined && data.hand.length) setJoined(true);
-        setMsg(data.yourTurn ? (data.role === "attacker" ? "Ваш ход (атакуйте)" : "Ваш ход (отбивайтесь)") : "Ожидание хода соперника");
+      const d = JSON.parse(e.data);
+      if (d.type === "waiting") {
+        setMsg(d.message);
+      } else if (d.type === "update") {
+        setHand(d.hand);
+        setOpponentCount(d.opponentCount);
+        setDeckCount(d.deckCount);
+        setTrump(d.trump);
+        setTableAttack(d.tableAttack);
+        setTableDefend(d.tableDefend);
+        setYourTurn(d.yourTurn);
+        setRole(d.role);
+        if (!joined) setJoined(true);
+        setMsg(
+          d.yourTurn
+            ? d.role === "attacker"
+              ? "Ваш ход: атакуйте"
+              : "Ваш ход: отбивайтесь"
+            : "Ожидание хода соперника"
+        );
       }
     };
     socket.onerror = () => setMsg("Ошибка соединения");
@@ -45,19 +50,17 @@ export default function App() {
   }, [joined]);
 
   const joinGame = () => {
-    if (ws) {
-      ws.send(JSON.stringify({ type: "join" }));
-      setMsg("Запрошено подключение...");
-    }
+    ws?.send(JSON.stringify({ type: "join" }));
+    setMsg("Запрошено подключение...");
   };
 
-  const playCard = (i: number) => {
+  const playAttack = (i: number) => {
     if (role === "attacker" && yourTurn) {
       ws?.send(JSON.stringify({ type: "attack", cardIndex: i }));
     }
   };
 
-  const defend = (i: number) => {
+  const playDefend = (i: number) => {
     if (role === "defender" && yourTurn) {
       ws?.send(JSON.stringify({ type: "defend", cardIndex: i }));
     }
@@ -77,19 +80,19 @@ export default function App() {
 
   return (
     <div className="app-container">
-      <img src={logo} alt="Logo" className="logo" />
+      <img src={logo} className="logo" alt="Logo" />
       <h1 className="title">DurakOnTon</h1>
 
       {!joined ? (
         <button className="btn-big" onClick={joinGame}>
-          Присоединиться
+          {msg.includes("Готов") ? "Присоединиться" : msg}
         </button>
       ) : (
         <>
           <div className="info-row">
             <div>Колода:</div>
             <div className="card-back deck-card">🂠</div>
-            <div>× {deckCount}</div>
+            <div>×{deckCount}</div>
             <div>Козырь:</div>
             <div className="card trump-card">
               {trump?.rank}
@@ -131,9 +134,9 @@ export default function App() {
                 className="card"
                 onClick={() =>
                   role === "attacker"
-                    ? playCard(i)
+                    ? playAttack(i)
                     : role === "defender"
-                    ? defend(i)
+                    ? playDefend(i)
                     : null
                 }
               >
@@ -144,13 +147,20 @@ export default function App() {
           </div>
 
           <div className="actions">
-            {role === "attacker" && (
-              <button className="btn-small" onClick={pass} disabled={!yourTurn}>
+            {role === "attacker" ? (
+              <button
+                className="btn-small"
+                onClick={pass}
+                disabled={!yourTurn}
+              >
                 Отбой
               </button>
-            )}
-            {role === "defender" && (
-              <button className="btn-small" onClick={take} disabled={!yourTurn}>
+            ) : (
+              <button
+                className="btn-small"
+                onClick={take}
+                disabled={!yourTurn}
+              >
                 Беру
               </button>
             )}
