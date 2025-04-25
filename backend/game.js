@@ -1,6 +1,6 @@
-// backend/game.js
+const waiting = [];
 
-// Создаем и тасуем колоду
+// Создаем колоду 36 карт
 function createDeck() {
   const suits = ["♠","♥","♦","♣"];
   const ranks = ["6","7","8","9","10","J","Q","K","A"];
@@ -10,6 +10,8 @@ function createDeck() {
   );
   return deck;
 }
+
+// Перемешиваем колоду
 function shuffle(deck) {
   for (let i = deck.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -17,13 +19,11 @@ function shuffle(deck) {
   }
 }
 
-const waiting = [];
-
 export function handleSocket(ws) {
   ws.on("message", raw => {
     const msg = JSON.parse(raw);
 
-    // Новый игрок зашел
+    // 1) Подключение к игре
     if (msg.type === "join") {
       waiting.push(ws);
       if (waiting.length >= 2) {
@@ -32,54 +32,59 @@ export function handleSocket(ws) {
       } else {
         ws.send(JSON.stringify({ type: "waiting", message: "Ждём второго игрока..." }));
       }
+      return;
     }
 
-    // Далее после старта игры
+    // 2) Все остальные сообщения только после старта
     if (!ws.game) return;
     const game = ws.game;
     const idx = ws.playerIdx;
-    const defenderIdx = 1 - game.turnAttacker;
+    const opponentIdx = 1 - idx;
 
     // Атакующий ходит
     if (msg.type === "attack" && idx === game.turnAttacker) {
       const card = game.hands[idx].splice(msg.cardIndex, 1)[0];
       game.table.attack.push(card);
-      game.turnDefender = defenderIdx;
+      game.turnDefender = opponentIdx;
       broadcastUpdate(game);
+      return;
     }
 
-    // Защищающемуся предлагается отбиться любым
-    if (msg.type === "defend" && idx === defenderIdx && game.table.defend.length < game.table.attack.length) {
+    // Защитник отбивается
+    if (
+      msg.type === "defend" &&
+      idx !== game.turnAttacker &&
+      game.table.defend.length < game.table.attack.length
+    ) {
       const card = game.hands[idx].splice(msg.cardIndex, 1)[0];
       game.table.defend.push(card);
       broadcastUpdate(game);
+      return;
     }
 
-    // Атакующий может «отбить» (pass) — завершить раунд
+    // Атакующий сбрасывает карты (pass)
     if (msg.type === "pass" && idx === game.turnAttacker) {
-      // просто сброс стол
       game.table.attack = [];
       game.table.defend = [];
-      game.turnAttacker = defenderIdx; // меняем роли
+      game.turnAttacker = opponentIdx;
       broadcastUpdate(game);
+      return;
     }
 
-    // Защитный «беру» — добавляет все карты со стола в руку защитника
-    if (msg.type === "take" && idx === defenderIdx) {
+    // Защитник берёт карты
+    if (msg.type === "take" && idx !== game.turnAttacker) {
       game.hands[idx].push(...game.table.attack, ...game.table.defend);
       game.table.attack = [];
       game.table.defend = [];
-      game.turnAttacker = defenderIdx; // пока защитник становится атакующим
+      game.turnAttacker = idx;
       broadcastUpdate(game);
+      return;
     }
   });
 
-  ws.on("close", () => {
-    // здесь можно чистить игру
-  });
+  ws.on("close", () => console.log("WebSocket: client disconnected"));
 }
 
-// Запуск игры при двух игроках
 function startGame(p1, p2) {
   const deck = createDeck();
   shuffle(deck);
@@ -89,41 +94,32 @@ function startGame(p1, p2) {
     hands[0].push(deck.pop());
     hands[1].push(deck.pop());
   }
-
-  // Сохраняем состояние
   const game = {
     deck,
     trump,
     hands,
     table: { attack: [], defend: [] },
-    turnAttacker: 0
+    turnAttacker: 0,
+    players: [p1, p2]
   };
 
+  // Привязываем состояние к ws
   [p1, p2].forEach((ws, idx) => {
     ws.game = game;
     ws.playerIdx = idx;
   });
 
-  // Первичные рассылки
   broadcastUpdate(game);
 }
 
-// Рассылать всем актуальное состояние
 function broadcastUpdate(game) {
-  game.players = game.players || [];
-  // Если игроки ещё не записаны – запишем
-  if (!game.players.length) {
-    game.players = [game.deck ? null : null]; // placeholder
-  }
-  // На самом деле у нас game.players уже проставлены в startGame
-
   game.players.forEach((ws, i) => {
     const opponentIdx = 1 - i;
     ws.send(JSON.stringify({
       type: "update",
       hand: game.hands[i],
-      deckCount: game.deck.length,
       opponentCount: game.hands[opponentIdx].length,
+      deckCount: game.deck.length,
       trump: game.trump,
       tableAttack: game.table.attack,
       tableDefend: game.table.defend,
