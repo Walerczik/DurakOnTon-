@@ -14,8 +14,9 @@ export default function App() {
   const [trump, setTrump] = useState<Card | null>(null);
   const [tableAttack, setTableAttack] = useState<Card[]>([]);
   const [tableDefend, setTableDefend] = useState<Card[]>([]);
-  const [yourTurn, setYourTurn] = useState(false);
-  const [role, setRole] = useState<"attacker" | "defender">("attacker");
+  const [attacker, setAttacker] = useState<number>(0);
+  const [current, setCurrent] = useState<number>(0);
+  const [playerIdx, setPlayerIdx] = useState<number>(0);
   const [msg, setMsg] = useState("Подключение...");
 
   useEffect(() => {
@@ -32,48 +33,52 @@ export default function App() {
         setTrump(d.trump);
         setTableAttack(d.tableAttack);
         setTableDefend(d.tableDefend);
-        setYourTurn(d.yourTurn);
-        setRole(d.role);
+        setAttacker(d.attacker);
+        setCurrent(d.current);
+        setPlayerIdx(d.playerIdx);
         if (!joined) setJoined(true);
-        setMsg(
-          d.yourTurn
-            ? d.role === "attacker"
+
+        if (d.current === d.playerIdx) {
+          setMsg(
+            d.current === d.attacker
               ? "Ваш ход: атакуйте"
               : "Ваш ход: отбивайтесь"
-            : "Ожидание хода соперника"
-        );
+          );
+        } else {
+          setMsg("Ожидание хода соперника");
+        }
       }
     };
     socket.onerror = () => setMsg("Ошибка соединения");
     setWs(socket);
     return () => socket.close();
-  }, [joined]);
+  }, []);
 
   const joinGame = () => {
     ws?.send(JSON.stringify({ type: "join" }));
-    setMsg("Запрошено подключение...");
+    setMsg("Ждём второго игрока…");
   };
 
-  const playAttack = (i: number) => {
-    if (role === "attacker" && yourTurn) {
+  const attack = (i: number) => {
+    if (current === attacker && playerIdx === attacker) {
       ws?.send(JSON.stringify({ type: "attack", cardIndex: i }));
     }
   };
 
-  const playDefend = (i: number) => {
-    if (role === "defender" && yourTurn) {
+  const defend = (i: number) => {
+    if (current !== attacker && playerIdx !== attacker) {
       ws?.send(JSON.stringify({ type: "defend", cardIndex: i }));
     }
   };
 
   const pass = () => {
-    if (role === "attacker" && yourTurn) {
+    if (current === attacker && playerIdx === attacker) {
       ws?.send(JSON.stringify({ type: "pass" }));
     }
   };
 
   const take = () => {
-    if (role === "defender" && yourTurn) {
+    if (current !== attacker && playerIdx !== attacker) {
       ws?.send(JSON.stringify({ type: "take" }));
     }
   };
@@ -89,23 +94,24 @@ export default function App() {
         </button>
       ) : (
         <>
-          <div className="deck-trump-area">
-            <div className="deck-stack">
-              <div className="card-back deck-card">🂠</div>
-              <div className="deck-count">×{deckCount}</div>
-            </div>
-            <div className="trump-card">
-              {trump?.rank}
-              {trump?.suit}
+          <div className="opponent-section">
+            <div className="opponent-hand">
+              {Array(opponentCount)
+                .fill(0)
+                .map((_, i) => (
+                  <div key={i} className="card-back">🂠</div>
+                ))}
             </div>
           </div>
 
-          <div className="opponent-hand">
-            {Array(opponentCount)
-              .fill(0)
-              .map((_, i) => (
-                <div key={i} className="card-back">🂠</div>
-              ))}
+          <div className="deck-trump-area">
+            <div className="deck-stack">
+              <div className="trump-card deck-trump-behind">
+                {trump?.rank}{trump?.suit}
+              </div>
+              <div className="card-back deck-card">🂠</div>
+            </div>
+            <div className="deck-count">×{deckCount}</div>
           </div>
 
           <div className="table">
@@ -127,11 +133,7 @@ export default function App() {
                 key={i}
                 className="card"
                 onClick={() =>
-                  role === "attacker"
-                    ? playAttack(i)
-                    : role === "defender"
-                    ? playDefend(i)
-                    : null
+                  playerIdx === attacker ? attack(i) : defend(i)
                 }
               >
                 {c.rank}{c.suit}
@@ -140,12 +142,20 @@ export default function App() {
           </div>
 
           <div className="actions">
-            {role === "attacker" ? (
-              <button className="btn-small" onClick={pass} disabled={!yourTurn}>
+            {playerIdx === attacker ? (
+              <button
+                className="btn-small"
+                onClick={pass}
+                disabled={current !== attacker}
+              >
                 Отбой
               </button>
             ) : (
-              <button className="btn-small" onClick={take} disabled={!yourTurn}>
+              <button
+                className="btn-small"
+                onClick={take}
+                disabled={current === attacker}
+              >
                 Беру
               </button>
             )}
