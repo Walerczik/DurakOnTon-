@@ -1,3 +1,4 @@
+// backend/index.js
 import express from "express";
 import cors from "cors";
 import http from "http";
@@ -10,22 +11,18 @@ app.use(express.json());
 
 const server = http.createServer(app);
 
-// Логируем апгрейд-запросы WebSocket
-server.on("upgrade", (req, socket, head) => {
-  console.log("↑ Upgrade request to:", req.url);
+// Логируем WebSocket upgrade
+server.on("upgrade", (req) => {
+  console.log("↑ Upgrade WS:", req.url);
 });
 
 const wss = new WebSocketServer({ server });
-wss.on("connection", ws => {
-  console.log("✔ WebSocket: new connection");
+wss.on("connection", (ws) => {
+  console.log("✔ WS connected");
   handleSocket(ws);
 });
 
-app.get("/", (req, res) => {
-  res.send("Backend is up");
-});
+app.get("/", (_, res) => res.send("Backend is up"));
 
 const PORT = process.env.PORT || 3001;
-server.listen(PORT, () => {
-  console.log(`Server listening on ${PORT}`);
-});
+server.listen(PORT, () => console.log(`Server listening on ${PORT}`));
