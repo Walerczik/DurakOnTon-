@@ -1,24 +1,31 @@
-import React, { useEffect, useState } from 'react';
-import { io } from 'socket.io-client';
-import GameTable from './components/GameTable';
-import Lobby from './components/Lobby';
+import React, { useEffect, useState } from "react";
+import "./App.css";
+import Lobby from "./components/Lobby";
+import GameTable from "./components/GameTable";
+import { io, Socket } from "socket.io-client";
+import { Card } from "./components/GameTable";
 
-const socket = io(process.env.REACT_APP_BACKEND_URL || 'https://durakonton.onrender.com');
+export interface Player {
+  id: string;
+  hand: Card[];
+}
+
+const SOCKET_URL = process.env.REACT_APP_BACKEND_URL || "https://durakonton.onrender.com";
+const socket: Socket = io(SOCKET_URL);
 
 function App() {
-  const [player, setPlayer] = useState(null);
+  const [player, setPlayer] = useState<Player | null>(null);
 
   useEffect(() => {
-    socket.on('connect', () => {
-      console.log('Connected to server');
+    // Событие при инициализации — присвоение игрока
+    socket.on("init", (data: { player: Player }) => {
+      setPlayer(data.player);
     });
-
-    socket.on('playerAssigned', (playerData) => {
-      setPlayer(playerData);
-    });
+    // После чего сервер шлёт начальные данные и игрок считается «в лобби»
+    // Далее сервер будет рассылать «update» внутри GameTable
 
     return () => {
-      socket.disconnect();
+      socket.off("init");
     };
   }, []);
 
