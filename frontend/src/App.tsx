@@ -80,7 +80,7 @@ export default function App() {
 
   return (
     <div className="app-container">
-      <img src={logo} className="logo" alt="Logo" />
+      <img src={logo} className="logo" alt="DurakOnTon Logo" />
       <h1 className="title">DurakOnTon</h1>
 
       {!joined ? (
@@ -89,12 +89,12 @@ export default function App() {
         </button>
       ) : (
         <>
-          <div className="info-row">
-            <div>Колода:</div>
-            <div className="card-back deck-card">🂠</div>
-            <div>×{deckCount}</div>
-            <div>Козырь:</div>
-            <div className="card trump-card">
+          <div className="deck-trump-area">
+            <div className="deck-stack">
+              <div className="card-back deck-card">🂠</div>
+              <div className="deck-count">×{deckCount}</div>
+            </div>
+            <div className="trump-card">
               {trump?.rank}
               {trump?.suit}
             </div>
@@ -111,18 +111,12 @@ export default function App() {
           <div className="table">
             <div className="attack">
               {tableAttack.map((c, i) => (
-                <div key={i} className="card">
-                  {c.rank}
-                  {c.suit}
-                </div>
+                <div key={i} className="card">{c.rank}{c.suit}</div>
               ))}
             </div>
             <div className="defend">
               {tableDefend.map((c, i) => (
-                <div key={i} className="card defend-card">
-                  {c.rank}
-                  {c.suit}
-                </div>
+                <div key={i} className="card defend-card">{c.rank}{c.suit}</div>
               ))}
             </div>
           </div>
@@ -140,27 +134,18 @@ export default function App() {
                     : null
                 }
               >
-                {c.rank}
-                {c.suit}
+                {c.rank}{c.suit}
               </div>
             ))}
           </div>
 
           <div className="actions">
             {role === "attacker" ? (
-              <button
-                className="btn-small"
-                onClick={pass}
-                disabled={!yourTurn}
-              >
+              <button className="btn-small" onClick={pass} disabled={!yourTurn}>
                 Отбой
               </button>
             ) : (
-              <button
-                className="btn-small"
-                onClick={take}
-                disabled={!yourTurn}
-              >
+              <button className="btn-small" onClick={take} disabled={!yourTurn}>
                 Беру
               </button>
             )}
