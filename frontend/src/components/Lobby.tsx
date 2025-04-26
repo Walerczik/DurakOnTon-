@@ -1,20 +1,19 @@
-import React from "react";
-import { Socket } from "socket.io-client";
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
-interface LobbyProps {
-  socket: Socket;
-}
+const Lobby: React.FC = () => {
+  const navigate = useNavigate();
 
-const Lobby: React.FC<LobbyProps> = ({ socket }) => {
-  const joinGame = () => {
-    socket.emit("joinGame");
+  const startGame = () => {
+    navigate('/game');
   };
 
   return (
     <div>
-      <h2>Lobby</h2>
-      <button onClick={joinGame}>Join Game</button>
+      <h1>Lobby</h1>
+      <button onClick={startGame}>Start Game</button>
     </div>
   );
 };
+
 export default Lobby;
