@@ -1,56 +1,29 @@
-import React, { useState } from "react";
-import { Socket } from "socket.io-client";
+import React, { useContext } from 'react';
+import { GameContext } from '../context/GameContext';
 
-export interface Card {
-  suit: string;
-  value: number;
-}
-
-export interface Player {
-  id: string;
-  hand: Card[];
-}
-
-
-interface GameTableProps {
-  socket: Socket;
-  player: Player;
-}
-
-const GameTable: React.FC<GameTableProps> = ({ socket, player }) => {
-  const [deck, setDeck] = useState<Card[]>([]);
+const GameTable: React.FC = () => {
+  const { state, setState } = useContext(GameContext);
 
   const endTurn = () => {
-    if (deck.length > 0) {
-      const updatedHand = [...player.hand];
-      const updatedDeck = [...deck];
-
-      while (updatedHand.length < 6 && updatedDeck.length > 0) {
-        updatedHand.push(updatedDeck.pop()!);
+    if (state.deck.length > 0) {
+      const updatedHand = [...state.hand];
+      while (updatedHand.length < 6 && state.deck.length > 0) {
+        const card = state.deck.pop();
+        if (card) {
+          updatedHand.push(card);
+        }
       }
-
-      setDeck(updatedDeck);
-
-      socket.emit("updateHand", updatedHand);
+      setState(prevState => ({
+        ...prevState,
+        hand: updatedHand,
+      }));
     }
   };
 
   return (
     <div>
       <h2>Game Table</h2>
-      <div>
-        <h3>Your Hand:</h3>
-        <ul>
-          {player.hand.map((card, index) => (
-            <li key={index}>
-              {card.value} of {card.suit}
-            </li>
-          ))}
-        </ul>
-      </div>
-      <div>
-        <button onClick={endTurn}>End Turn</button>
-      </div>
+      <button onClick={endTurn}>End Turn</button>
     </div>
   );
 };
