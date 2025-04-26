@@ -17,5 +17,4 @@ const Lobby: React.FC<LobbyProps> = ({ socket }) => {
     </div>
   );
 };
-
 export default Lobby;
