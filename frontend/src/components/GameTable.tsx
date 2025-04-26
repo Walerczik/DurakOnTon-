@@ -30,7 +30,6 @@ const GameTable: React.FC<GameTableProps> = ({ socket, player }) => {
 
       setDeck(updatedDeck);
 
-      // Обновление руки игрока можно отправить на сервер, если нужно
       socket.emit("updateHand", updatedHand);
     }
   };
