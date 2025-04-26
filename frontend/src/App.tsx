@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Lobby from './components/Lobby';
 import GameTable from './components/GameTable';
 import { GameProvider } from './context/GameContext';
