@@ -11,6 +11,7 @@ export interface Player {
   hand: Card[];
 }
 
+
 interface GameTableProps {
   socket: Socket;
   player: Player;
