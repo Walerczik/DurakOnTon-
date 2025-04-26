@@ -1,20 +1,17 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Lobby from './components/Lobby';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import GameTable from './components/GameTable';
-import { GameProvider } from './context/GameContext';
 
-const App: React.FC = () => {
+function App() {
   return (
-    <GameProvider>
-      <Router>
+    <Router>
+      <div className="App">
         <Routes>
-          <Route path="/" element={<Lobby />} />
-          <Route path="/game" element={<GameTable />} />
+          <Route path="/" element={<GameTable />} />
         </Routes>
-      </Router>
-    </GameProvider>
+      </div>
+    </Router>
   );
-};
+}
 
 export default App;
