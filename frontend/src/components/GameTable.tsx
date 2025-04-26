@@ -1,6 +1,15 @@
-import React from "react";
+import React, { useState } from "react";
 import { Socket } from "socket.io-client";
-import { Card, Player } from "../App";
+
+export interface Card {
+  suit: string;
+  value: number;
+}
+
+export interface Player {
+  id: string;
+  hand: Card[];
+}
 
 interface GameTableProps {
   socket: Socket;
@@ -8,8 +17,22 @@ interface GameTableProps {
 }
 
 const GameTable: React.FC<GameTableProps> = ({ socket, player }) => {
+  const [deck, setDeck] = useState<Card[]>([]);
+
   const endTurn = () => {
-    socket.emit("endTurn");
+    if (deck.length > 0) {
+      const updatedHand = [...player.hand];
+      const updatedDeck = [...deck];
+
+      while (updatedHand.length < 6 && updatedDeck.length > 0) {
+        updatedHand.push(updatedDeck.pop()!);
+      }
+
+      setDeck(updatedDeck);
+
+      // Обновление руки игрока можно отправить на сервер, если нужно
+      socket.emit("updateHand", updatedHand);
+    }
   };
 
   return (
@@ -17,15 +40,17 @@ const GameTable: React.FC<GameTableProps> = ({ socket, player }) => {
       <h2>Game Table</h2>
       <div>
         <h3>Your Hand:</h3>
-        <div style={{ display: "flex", gap: "10px" }}>
+        <ul>
           {player.hand.map((card, index) => (
-            <div key={index} style={{ border: "1px solid black", padding: "5px" }}>
-              {card.rank} of {card.suit}
-            </div>
+            <li key={index}>
+              {card.value} of {card.suit}
+            </li>
           ))}
-        </div>
+        </ul>
       </div>
-      <button onClick={endTurn}>End Turn</button>
+      <div>
+        <button onClick={endTurn}>End Turn</button>
+      </div>
     </div>
   );
 };
