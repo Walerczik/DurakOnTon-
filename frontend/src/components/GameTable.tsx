@@ -6,6 +6,11 @@ export interface Card {
   rank: string;
 }
 
+export interface Player {
+  id: string;
+  name?: string;
+}
+
 interface GameState {
   hand: Card[];
   deck: Card[];
@@ -13,9 +18,10 @@ interface GameState {
 
 interface GameTableProps {
   socket: Socket;
+  player: Player;
 }
 
-const GameTable: React.FC<GameTableProps> = ({ socket }) => {
+const GameTable: React.FC<GameTableProps> = ({ socket, player }) => {
   const [state, setState] = useState<GameState>({
     hand: [],
     deck: [],
@@ -32,12 +38,13 @@ const GameTable: React.FC<GameTableProps> = ({ socket }) => {
         hand: updatedHand,
       });
     }
-    socket.emit('endTurn');
+    socket.emit('endTurn', { playerId: player.id });
   };
 
   return (
     <div>
-      <h2>Your Hand:</h2>
+      <h2>{player.name || 'You'}</h2>
+      <h3>Your Hand:</h3>
       <ul>
         {state.hand.map((card, index) => (
           <li key={index}>{`${card.rank} of ${card.suit}`}</li>
