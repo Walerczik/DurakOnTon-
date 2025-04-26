@@ -1,47 +1,21 @@
-import React, { useEffect, useState } from "react";
-import { io, Socket } from "socket.io-client";
-import Lobby from "./components/Lobby";
-import GameTable from "./components/GameTable";
+import React from "react";
+import { Socket } from "socket.io-client";
 
-export interface Card {
-  suit: string;
-  rank: string;
+interface LobbyProps {
+  socket: Socket;
 }
 
-export interface Player {
-  id: string;
-  hand: Card[];
-}
-
-export interface GameState {
-  deck: Card[];
-  players: Player[];
-}
-
-const socket: Socket = io("https://durak-server-weld.vercel.app/");
-
-function App() {
-  const [player, setPlayer] = useState<Player | null>(null);
-
-  useEffect(() => {
-    socket.on("playerData", (playerData: Player) => {
-      setPlayer(playerData);
-    });
-
-    return () => {
-      socket.off("playerData");
-    };
-  }, []);
+const Lobby: React.FC<LobbyProps> = ({ socket }) => {
+  const joinGame = () => {
+    socket.emit("joinGame");
+  };
 
   return (
-    <div className="App">
-      {player ? (
-        <GameTable socket={socket} player={player} />
-      ) : (
-        <Lobby socket={socket} />
-      )}
+    <div>
+      <h2>Lobby</h2>
+      <button onClick={joinGame}>Join Game</button>
     </div>
   );
-}
+};
 
-export default App;
+export default Lobby;
