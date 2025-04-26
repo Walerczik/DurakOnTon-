@@ -1,15 +1,13 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Lobby from "./components/Lobby";
-import ModeSelection from "./components/ModeSelection";
-import Game from "./components/Game";
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import GameLobby from './pages/GameLobby';
+import GamePage from './pages/GamePage';
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Lobby />} />
-        <Route path="/mode" element={<ModeSelection />} />
-        <Route path="/game" element={<Game />} />
+        <Route path="/" element={<GameLobby />} />
+        <Route path="/game" element={<GamePage />} />
       </Routes>
     </Router>
   );
