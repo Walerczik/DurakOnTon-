@@ -1,20 +1,15 @@
-import { Card as CardType } from "../types/Card";
-import CardBack from "../assets/CardBack.png";
+interface CardProps {
+  value: string;
+  suit: string;
+}
 
-type CardProps = {
-  card: CardType;
-  onClick?: () => void;
-};
-
-function Card({ card, onClick }: CardProps) {
-  if (!card) {
-    return <img src={CardBack} className="card" alt="Back" />;
-  }
+const Card: React.FC<CardProps> = ({ value, suit }) => {
   return (
-    <div className="card" onClick={onClick}>
-      {card.suit} {card.rank}
+    <div className="card" style={{ display: 'inline-block', margin: '10px' }}>
+      <img src="/back_of_card.png" alt="Card Back" style={{ width: '80px' }} />
+      <div>{value} {suit}</div>
     </div>
   );
-}
+};
 
 export default Card;
