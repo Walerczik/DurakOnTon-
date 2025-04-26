@@ -1,58 +1,51 @@
-import React, { useEffect, useState } from "react";
-import { Socket } from "socket.io-client";
+import React, { useState } from 'react';
+import { Socket } from 'socket.io-client';
 
-export type Card = { suit: string; value: string };
-
-interface Props {
-  socket: Socket;
-  player: { id: string; hand: Card[] };
+interface Card {
+  suit: string;
+  rank: string;
 }
 
-const GameTable: React.FC<Props> = ({ socket, player }) => {
-  const [opponentHand, setOpponentHand] = useState<number>(0);
-  const [tableCards, setTableCards] = useState<Card[]>([]);
-  const [isPlayerTurn, setIsPlayerTurn] = useState<boolean>(false);
+interface GameState {
+  hand: Card[];
+  deck: Card[];
+}
 
-  useEffect(() => {
-    socket.on("gameState", (state) => {
-      setOpponentHand(state.opponentHand);
-      setTableCards(state.tableCards);
-      setIsPlayerTurn(state.currentPlayerId === player.id);
-    });
+interface GameTableProps {
+  socket: Socket;
+  player: { id: string; name: string };
+}
 
-    socket.emit("joinGame", player.id);
+const GameTable: React.FC<GameTableProps> = ({ socket, player }) => {
+  const [state, setState] = useState<GameState>({
+    hand: [],
+    deck: [],
+  });
 
-    return () => {
-      socket.off("gameState");
-    };
-  }, [socket, player.id]);
+  const endTurn = () => {
+    if (state.deck.length > 0) {
+      const updatedHand = [...state.hand];
+      const updatedDeck = [...state.deck];
 
-  const handlePlayCard = (card: Card) => {
-    if (isPlayerTurn) {
-      socket.emit("playCard", card);
+      while (updatedHand.length < 6 && updatedDeck.length > 0) {
+        updatedHand.push(updatedDeck.pop()!);
+      }
+
+      setState({ hand: updatedHand, deck: updatedDeck });
     }
   };
 
   return (
     <div>
       <h2>Game Table</h2>
-      <p>Opponent's cards: {opponentHand}</p>
-      <div>
-        <h3>Table</h3>
-        {tableCards.map((card, index) => (
-          <div key={index}>
-            {card.value} of {card.suit}
-          </div>
+      <p>Player: {player.name}</p>
+      <h3>Your Hand:</h3>
+      <ul>
+        {state.hand.map((card, idx) => (
+          <li key={idx}>{card.rank} of {card.suit}</li>
         ))}
-      </div>
-      <div>
-        <h3>Your Hand</h3>
-        {player.hand.map((card, index) => (
-          <button key={index} onClick={() => handlePlayCard(card)}>
-            {card.value} of {card.suit}
-          </button>
-        ))}
-      </div>
+      </ul>
+      <button onClick={endTurn}>End Turn</button>
     </div>
   );
 };
