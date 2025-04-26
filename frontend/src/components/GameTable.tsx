@@ -1,20 +1,6 @@
-import React, { useState } from 'react';
-import { Socket } from 'socket.io-client';
-
-export interface Card {
-  suit: string;
-  rank: string;
-}
-
-export interface Player {
-  id: string;
-  name?: string;
-}
-
-interface GameState {
-  hand: Card[];
-  deck: Card[];
-}
+import React from "react";
+import { Socket } from "socket.io-client";
+import { Card, Player } from "../App";
 
 interface GameTableProps {
   socket: Socket;
@@ -22,34 +8,23 @@ interface GameTableProps {
 }
 
 const GameTable: React.FC<GameTableProps> = ({ socket, player }) => {
-  const [state, setState] = useState<GameState>({
-    hand: [],
-    deck: [],
-  });
-
   const endTurn = () => {
-    if (state.deck.length > 0) {
-      const updatedHand = [...state.hand];
-      while (updatedHand.length < 6 && state.deck.length > 0) {
-        updatedHand.push(state.deck.pop()!);
-      }
-      setState({
-        ...state,
-        hand: updatedHand,
-      });
-    }
-    socket.emit('endTurn', { playerId: player.id });
+    socket.emit("endTurn");
   };
 
   return (
     <div>
-      <h2>{player.name || 'You'}</h2>
-      <h3>Your Hand:</h3>
-      <ul>
-        {state.hand.map((card, index) => (
-          <li key={index}>{`${card.rank} of ${card.suit}`}</li>
-        ))}
-      </ul>
+      <h2>Game Table</h2>
+      <div>
+        <h3>Your Hand:</h3>
+        <div style={{ display: "flex", gap: "10px" }}>
+          {player.hand.map((card, index) => (
+            <div key={index} style={{ border: "1px solid black", padding: "5px" }}>
+              {card.rank} of {card.suit}
+            </div>
+          ))}
+        </div>
+      </div>
       <button onClick={endTurn}>End Turn</button>
     </div>
   );
