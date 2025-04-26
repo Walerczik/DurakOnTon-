@@ -1,17 +1,31 @@
-// В функции endTurn или passTurn — добор карт
+import React, { createContext, useState, ReactNode } from 'react';
 
-const endTurn = () => {
-  if (state.deck.length > 0) {
-    const updatedHand = [...state.hand];
-    while (updatedHand.length < 6 && state.deck.length > 0) {
-      updatedHand.push(state.deck.pop()!);
-    }
-    setState(prev => ({
-      ...prev,
-      hand: updatedHand,
-      opponentHand: Array(Math.min(6, prev.opponentHand.length + 1)).fill(null),
-      currentPlayer: prev.playerId === 'player1' ? 'player2' : 'player1',
-      table: [],
-    }));
-  }
+interface Card {
+  suit: string;
+  value: number;
+}
+
+interface GameState {
+  hand: Card[];
+  deck: Card[];
+}
+
+interface GameContextType {
+  state: GameState;
+  setState: React.Dispatch<React.SetStateAction<GameState>>;
+}
+
+export const GameContext = createContext<GameContextType>({} as GameContextType);
+
+export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [state, setState] = useState<GameState>({
+    hand: [],
+    deck: [],
+  });
+
+  return (
+    <GameContext.Provider value={{ state, setState }}>
+      {children}
+    </GameContext.Provider>
+  );
 };
