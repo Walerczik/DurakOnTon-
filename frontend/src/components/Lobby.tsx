@@ -1,34 +1,41 @@
-import React, { useState } from 'react';
-import './Lobby.css';
+import React, { useEffect, useState } from 'react';
+import { Socket } from 'socket.io-client';
 
-type Props = {
-  socket: any;
-};
+interface LobbyProps {
+  socket: Socket;
+}
 
-const Lobby: React.FC<Props> = ({ socket }) => {
-  const [showModes, setShowModes] = useState(false);
+interface Player {
+  id: string;
+  name: string;
+}
 
-  const handleFindGameClick = () => {
-    setShowModes(true);
-  };
+const Lobby: React.FC<LobbyProps> = ({ socket }) => {
+  const [players, setPlayers] = useState<Player[]>([]);
 
-  const handleModeSelect = (mode: string) => {
-    socket.emit('joinGame', { mode });
+  useEffect(() => {
+    socket.on('playersUpdate', (updatedPlayers: Player[]) => {
+      setPlayers(updatedPlayers);
+    });
+
+    return () => {
+      socket.off('playersUpdate');
+    };
+  }, [socket]);
+
+  const handleStartGame = () => {
+    socket.emit('startGame');
   };
 
   return (
-    <div className="lobby-container">
-      {!showModes ? (
-        <button className="find-game-button" onClick={handleFindGameClick}>
-          Найти игру
-        </button>
-      ) : (
-        <div className="game-modes">
-          <button onClick={() => handleModeSelect('classic')}>Обычный</button>
-          <button onClick={() => handleModeSelect('podkidnoy')}>Подкидной</button>
-          <button onClick={() => handleModeSelect('perevodnoy')}>Переводной</button>
-        </div>
-      )}
+    <div>
+      <h2>Lobby</h2>
+      <ul>
+        {players.map((player) => (
+          <li key={player.id}>{player.name}</li>
+        ))}
+      </ul>
+      <button onClick={handleStartGame}>Start Game</button>
     </div>
   );
 };
