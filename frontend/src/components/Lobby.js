@@ -13,7 +13,7 @@ function Lobby({ setGameStarted, setGameType, setPlayersCount }) {
 
   return (
     <div className="lobby-container">
-      <img src={logo} alt="Logo" className="logo" />
+      <img src="/Logo.png" />
       <h2>Выберите тип игры</h2>
       <select value={type} onChange={(e) => setType(e.target.value)}>
         <option value="podkidnoy">Подкидной</option>
