@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import logo from '../public/Logo.png';
+import logo from 'Logo.png';
 
 function Lobby({ setGameStarted, setGameType, setPlayersCount }) {
   const [type, setType] = useState('podkidnoy');
