@@ -1,20 +1,28 @@
 import React, { useState } from 'react';
+import io from 'socket.io-client';
 import Lobby from './components/Lobby';
 import GameBoard from './components/GameBoard';
-import { io } from 'socket.io-client';
+import './App.css';
 
-const socket = io('http://localhost:5000'); // Адрес backend-сервера
+const socket = io('http://localhost:3001'); // Убедись, что бекенд доступен по этому адресу
 
 function App() {
-  const [inGame, setInGame] = useState(false);
   const [roomId, setRoomId] = useState('');
   const [playerHand, setPlayerHand] = useState([]);
+  const [inGame, setInGame] = useState(false);
+
+  socket.on('gameStarted', (hand) => {
+    setPlayerHand(hand);
+    setInGame(true);
+  });
 
   return (
     <div className="App">
-      {inGame
-        ? <GameBoard socket={socket} playerHand={playerHand} roomId={roomId} />
-        : <Lobby socket={socket} setInGame={setInGame} setRoomId={setRoomId} setPlayerHand={setPlayerHand} />}
+      {!inGame ? (
+        <Lobby socket={socket} setRoomId={setRoomId} />
+      ) : (
+        <GameBoard socket={socket} playerHand={playerHand} roomId={roomId} />
+      )}
     </div>
   );
 }
