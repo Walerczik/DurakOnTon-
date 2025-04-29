@@ -1,5 +1,5 @@
 import React from 'react';
-import cardBack from 'card_back.png';
+import cardBack from './card_back.png';
 
 function Card({ hidden }) {
   return (
