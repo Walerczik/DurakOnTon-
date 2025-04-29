@@ -1,39 +1,38 @@
 import React, { useState } from 'react';
 import './Lobby.css';
 
-const Lobby = ({ socket, setInGame, setRoomId, setPlayerHand }) => {
-  const [joinRoomId, setJoinRoomId] = useState('');
+function Lobby({ socket, setRoomId }) {
+  const [inputRoomId, setInputRoomId] = useState('');
 
-  const handleCreateRoom = () => {
+  const createRoom = () => {
     socket.emit('createRoom');
-    socket.on('roomCreated', ({ roomId }) => {
+    socket.on('roomCreated', (roomId) => {
       setRoomId(roomId);
-      setInGame(true);
-      setPlayerHand(generateHand());
     });
   };
 
-  const handleJoinRoom = () => {
-    if (joinRoomId) {
-      socket.emit('joinRoom', { roomId: joinRoomId });
-      socket.on('startGame', ({ roomId }) => {
-        setRoomId(roomId);
-        setInGame(true);
-        setPlayerHand(generateHand());
-      });
+  const joinRoom = () => {
+    if (inputRoomId.trim() !== '') {
+      socket.emit('joinRoom', inputRoomId);
+      setRoomId(inputRoomId);
     }
-  };
-
-  const generateHand = () => {
-    const suits = ['♠', '♥', '♦', '♣'];
-    const ranks = ['6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
-    let hand = [];
-    for (let i = 0; i < 6; i++) {
-      hand.push(ranks[Math.floor(Math.random() * ranks.length)] + suits[Math.floor(Math.random() * suits.length)]);
-    }
-    return hand;
   };
 
   return (
-    <div className="lobby">
-      <h1>Dur
+    <div className="lobby-container">
+      <h2>Добро пожаловать в Дуpaк</h2>
+      <div className="input-group">
+        <input
+          type="text"
+          placeholder="Введите ID комнаты"
+          value={inputRoomId}
+          onChange={(e) => setInputRoomId(e.target.value)}
+        />
+        <button onClick={joinRoom}>Присоединиться</button>
+      </div>
+      <button onClick={createRoom}>Создать комнату</button>
+    </div>
+  );
+}
+
+export default Lobby;
