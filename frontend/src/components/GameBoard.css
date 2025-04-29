@@ -1,0 +1,27 @@
+.game-board {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #1e293b;
+  height: 100vh;
+  color: white;
+  padding: 20px;
+}
+
+.deck-area {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.deck-count {
+  margin-right: 20px;
+}
+
+.deck-back {
+  width: 60px;
+  height: 90px;
+  background-color: darkred;
+  border-radius: 5px;
+  transform: rotate(90deg);
+}
