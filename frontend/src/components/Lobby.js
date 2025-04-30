@@ -1,51 +1,46 @@
 import React, { useState } from 'react';
-import GameSettings from './GameSettings';
+import { useNavigate } from 'react-router-dom';
+import './Lobby.css';
 
-function Lobby({ socket, setRoomId }) {
-  const [inputRoomId, setInputRoomId] = useState('');
-  const [showSettings, setShowSettings] = useState(false);
-  const [settings, setSettings] = useState({ players: 2, mode: 'classic' });
+function Lobby() {
+  const navigate = useNavigate();
+  const [players, setPlayers] = useState(2);
+  const [gameType, setGameType] = useState('подкидной');
 
   const handleCreateRoom = () => {
-    setShowSettings(true);
+    const queryParams = new URLSearchParams({ players, gameType }).toString();
+    navigate(`/game?${queryParams}`);
   };
 
-  const submitRoomCreation = () => {
-    socket.emit('createRoom', settings);
-    socket.on('roomCreated', (roomId) => {
-      setRoomId(roomId);
-    });
-  };
-
-  const joinRoom = () => {
-    if (inputRoomId.trim() !== '') {
-      socket.emit('joinRoom', inputRoomId);
-      setRoomId(inputRoomId);
-    }
+  const handleJoinRoom = () => {
+    navigate('/join');
   };
 
   return (
     <div className="lobby-container">
-      <h2>Добро пожаловать в Дуpaк</h2>
-      <div className="input-group">
-        <input
-          type="text"
-          placeholder="Введите ID комнаты"
-          value={inputRoomId}
-          onChange={(e) => setInputRoomId(e.target.value)}
-        />
-        <button onClick={joinRoom}>Присоединиться</button>
-      </div>
-      {!showSettings && (
-        <button onClick={handleCreateRoom}>Создать комнату</button>
-      )}
-      {showSettings && (
-        <GameSettings
-          settings={settings}
-          setSettings={setSettings}
-          onSubmit={submitRoomCreation}
-        />
-      )}
+      <h1 className="lobby-title">Добро пожаловать в Дурак Онлайн</h1>
+      
+      <select
+        className="lobby-select"
+        value={players}
+        onChange={(e) => setPlayers(Number(e.target.value))}
+      >
+        <option value={2}>2 игрока</option>
+        <option value={4}>4 игрока</option>
+        <option value={6}>6 игроков</option>
+      </select>
+
+      <select
+        className="lobby-select"
+        value={gameType}
+        onChange={(e) => setGameType(e.target.value)}
+      >
+        <option value="подкидной">Подкидной</option>
+        <option value="переводной">Переводной</option>
+      </select>
+
+      <button className="lobby-button" onClick={handleCreateRoom}>Создать комнату</button>
+      <button className="lobby-button" onClick={handleJoinRoom}>Присоединиться к комнате</button>
     </div>
   );
 }
