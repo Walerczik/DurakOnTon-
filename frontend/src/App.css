@@ -1,0 +1,21 @@
+/* Добавьте стили для вашего приложения */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f0f0f0;
+  margin: 0;
+  padding: 0;
+}
+
+.lobby-container, .game-room {
+  padding: 20px;
+}
+
+.input-group {
+  margin-bottom: 10px;
+}
+
+.game-settings {
+  background-color: #fff;
+  padding: 15px;
+  border-radius: 5px;
+}
