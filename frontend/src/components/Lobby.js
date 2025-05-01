@@ -1,46 +1,42 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import './Lobby.css';
 
 function Lobby() {
-  const navigate = useNavigate();
-  const [players, setPlayers] = useState(2);
+  const [numPlayers, setNumPlayers] = useState(2);
   const [gameType, setGameType] = useState('подкидной');
 
   const handleCreateRoom = () => {
-    const queryParams = new URLSearchParams({ players, gameType }).toString();
-    navigate(`/game?${queryParams}`);
-  };
-
-  const handleJoinRoom = () => {
-    navigate('/join');
+    console.log('Создание комнаты:', numPlayers, gameType);
+    // Здесь должна быть логика отправки данных на сервер
   };
 
   return (
     <div className="lobby-container">
-      <h1 className="lobby-title">Добро пожаловать в Дурак Онлайн</h1>
-      
-      <select
-        className="lobby-select"
-        value={players}
-        onChange={(e) => setPlayers(Number(e.target.value))}
-      >
-        <option value={2}>2 игрока</option>
-        <option value={4}>4 игрока</option>
-        <option value={6}>6 игроков</option>
-      </select>
+      <div className="lobby-content">
+        <img src="/logo.png" alt="Logo" className="lobby-logo" />
+        <h2>Создать комнату</h2>
 
-      <select
-        className="lobby-select"
-        value={gameType}
-        onChange={(e) => setGameType(e.target.value)}
-      >
-        <option value="подкидной">Подкидной</option>
-        <option value="переводной">Переводной</option>
-      </select>
+        <div className="lobby-select">
+          <label>Количество игроков:</label>
+          <select value={numPlayers} onChange={(e) => setNumPlayers(parseInt(e.target.value))}>
+            <option value={2}>2</option>
+            <option value={4}>4</option>
+            <option value={6}>6</option>
+          </select>
+        </div>
 
-      <button className="lobby-button" onClick={handleCreateRoom}>Создать комнату</button>
-      <button className="lobby-button" onClick={handleJoinRoom}>Присоединиться к комнате</button>
+        <div className="lobby-select">
+          <label>Тип игры:</label>
+          <select value={gameType} onChange={(e) => setGameType(e.target.value)}>
+            <option value="подкидной">Подкидной</option>
+            <option value="переводной">Переводной</option>
+          </select>
+        </div>
+
+        <button className="create-button" onClick={handleCreateRoom}>
+          Создать комнату
+        </button>
+      </div>
     </div>
   );
 }
