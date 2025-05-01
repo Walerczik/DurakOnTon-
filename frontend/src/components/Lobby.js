@@ -1,44 +1,40 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Lobby.css';
 
-function Lobby() {
-  const [numPlayers, setNumPlayers] = useState(2);
-  const [gameType, setGameType] = useState('подкидной');
+const Lobby = () => {
+  const navigate = useNavigate();
+  const [roomId, setRoomId] = useState('');
 
-  const handleCreateRoom = () => {
-    console.log('Создание комнаты:', numPlayers, gameType);
-    // Здесь можно добавить socket.emit или переход
+  const createRoom = () => {
+    const newRoomId = Math.random().toString(36).substring(2, 8);
+    navigate(`/room/${newRoomId}`);
   };
+
+  const joinRoom = () => {
+    if (roomId.trim()) {
+      navigate(`/room/${roomId}`);
+    }
+  };
+
+  const logo = process.env.PUBLIC_URL + '/logo.png';
 
   return (
     <div className="lobby-container">
-      <div className="lobby-content">
-        <img src="/logo.png" alt="Logo" className="lobby-logo" />
-        <h2>Создать комнату</h2>
-
-        <div className="lobby-select">
-          <label>Количество игроков:</label>
-          <select value={numPlayers} onChange={(e) => setNumPlayers(parseInt(e.target.value))}>
-            <option value={2}>2</option>
-            <option value={4}>4</option>
-            <option value={6}>6</option>
-          </select>
-        </div>
-
-        <div className="lobby-select">
-          <label>Тип игры:</label>
-          <select value={gameType} onChange={(e) => setGameType(e.target.value)}>
-            <option value="подкидной">Подкидной</option>
-            <option value="переводной">Переводной</option>
-          </select>
-        </div>
-
-        <button className="create-button" onClick={handleCreateRoom}>
-          Создать комнату
-        </button>
+      <img src={logo} alt="Logo" className="background-logo" />
+      <div className="lobby-box">
+        <h1>Добро пожаловать в Дурака на TON</h1>
+        <button onClick={createRoom}>Создать комнату</button>
+        <input
+          type="text"
+          placeholder="Введите ID комнаты"
+          value={roomId}
+          onChange={(e) => setRoomId(e.target.value)}
+        />
+        <button onClick={joinRoom}>Присоединиться</button>
       </div>
     </div>
   );
-}
+};
 
 export default Lobby;
