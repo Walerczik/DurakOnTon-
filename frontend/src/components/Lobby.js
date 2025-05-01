@@ -7,7 +7,7 @@ function Lobby() {
 
   const handleCreateRoom = () => {
     console.log('Создание комнаты:', numPlayers, gameType);
-    // Здесь должна быть логика отправки данных на сервер
+    // Тут будет логика
   };
 
   return (
